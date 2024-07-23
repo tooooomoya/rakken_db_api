@@ -97,7 +97,7 @@ app.get('/api/shows', (req, res) => {
   const keyword = req.query.keyword ? `%${req.query.keyword}%` : '%';
   const query = `
     SELECT * FROM shows
-    WHERE show_name LIKE $1 OR show_location LIKE $1 OR show_date LIKE $1
+    WHERE show_name LIKE $1 OR show_location LIKE $1
   `;
   
   pool.query(query, [keyword], (err, results) => {
