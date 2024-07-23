@@ -60,10 +60,16 @@ app.get('/api/audios', (req, res) => {
 
 // タイトル、演者、ショーのデータを取得するエンドポイント
 app.get('/api/titles', (req, res) => {
-  pool.query('SELECT * FROM titles', (error, results) => {
-    if (error) {
-      console.error('Error fetching titles:', error);
-      res.status(500).json({ message: 'Error fetching titles' });
+  const keyword = req.query.keyword ? `%${req.query.keyword}%` : '%';
+  const query = `
+    SELECT a.* FROM titles
+    WHERE a.title_name LIKE $1
+  `;
+  
+  pool.query(query, [keyword], (err, results) => {
+    if (err) {
+      console.error('Error fetching data from PostgreSQL:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
       return;
     }
     res.json(results.rows);
@@ -71,10 +77,16 @@ app.get('/api/titles', (req, res) => {
 });
 
 app.get('/api/players', (req, res) => {
-  pool.query('SELECT * FROM players', (error, results) => {
-    if (error) {
-      console.error('Error fetching players:', error);
-      res.status(500).json({ message: 'Error fetching players' });
+  const keyword = req.query.keyword ? `%${req.query.keyword}%` : '%';
+  const query = `
+    SELECT a.* FROM players
+    WHERE a.player_name LIKE $1
+  `;
+  
+  pool.query(query, [keyword], (err, results) => {
+    if (err) {
+      console.error('Error fetching data from PostgreSQL:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
       return;
     }
     res.json(results.rows);
@@ -82,10 +94,16 @@ app.get('/api/players', (req, res) => {
 });
 
 app.get('/api/shows', (req, res) => {
-  pool.query('SELECT * FROM shows', (error, results) => {
-    if (error) {
-      console.error('Error fetching shows:', error);
-      res.status(500).json({ message: 'Error fetching shows' });
+  const keyword = req.query.keyword ? `%${req.query.keyword}%` : '%';
+  const query = `
+    SELECT a.* FROM shows
+    WHERE a.show_name LIKE $1 OR a.show_location LIKE $1 OR a.show_date LIKE $1
+  `;
+  
+  pool.query(query, [keyword], (err, results) => {
+    if (err) {
+      console.error('Error fetching data from PostgreSQL:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
       return;
     }
     res.json(results.rows);
