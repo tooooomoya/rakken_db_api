@@ -62,8 +62,8 @@ app.get('/api/audios', (req, res) => {
 app.get('/api/titles', (req, res) => {
   const keyword = req.query.keyword ? `%${req.query.keyword}%` : '%';
   const query = `
-    SELECT a.* FROM titles
-    WHERE a.title_name LIKE $1
+    SELECT * FROM titles
+    WHERE title_name LIKE $1
   `;
   
   pool.query(query, [keyword], (err, results) => {
@@ -79,8 +79,8 @@ app.get('/api/titles', (req, res) => {
 app.get('/api/players', (req, res) => {
   const keyword = req.query.keyword ? `%${req.query.keyword}%` : '%';
   const query = `
-    SELECT a.* FROM players
-    WHERE a.player_name LIKE $1
+    SELECT * FROM players
+    WHERE player_name LIKE $1
   `;
   
   pool.query(query, [keyword], (err, results) => {
@@ -96,8 +96,8 @@ app.get('/api/players', (req, res) => {
 app.get('/api/shows', (req, res) => {
   const keyword = req.query.keyword ? `%${req.query.keyword}%` : '%';
   const query = `
-    SELECT a.* FROM shows
-    WHERE a.show_name LIKE $1 OR a.show_location LIKE $1 OR a.show_date LIKE $1
+    SELECT * FROM shows
+    WHERE show_name LIKE $1 OR show_location LIKE $1 OR show_date LIKE $1
   `;
   
   pool.query(query, [keyword], (err, results) => {
