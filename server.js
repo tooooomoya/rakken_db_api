@@ -130,12 +130,20 @@ app.post('/api/audios', (req, res) => {
   });
 });
 
-app.post('/api/titles', (req, res) => {
+
+app.post('/api/titles', async (req, res) => {
   const { title_name } = req.body;
 
   if (!title_name) {
     res.status(400).json({ message: 'Title is required' });
     return;
+  }
+
+  const checkQuery = 'SELECT * FROM titles WHERE title_name = $1';
+  const checkResult = await pool.query(checkQuery, [title_name]);
+
+  if (checkResult.rows.length > 0) {
+    return res.status(409).json({ error: 'Title already exists' });
   }
 
   const query = 'INSERT INTO titles (title_name) VALUES ($1)';
@@ -149,6 +157,8 @@ app.post('/api/titles', (req, res) => {
   });
 });
 
+
+
 app.post('/api/players', (req, res) => {
   const { player_name, player_num } = req.body;
 
@@ -157,23 +167,49 @@ app.post('/api/players', (req, res) => {
     return;
   }
 
-  const query = 'INSERT INTO players (player_name, player_num) VALUES ($1, $2)';
-  pool.query(query, [player_name, player_num], (error, results) => {
-    if (error) {
-      console.error('Error inserting player:', error);
-      res.status(500).json({ message: 'Error inserting player' });
+  // 既存のプレイヤーがいるかどうかを確認するクエリ
+  const checkQuery = 'SELECT * FROM players WHERE player_name = $1 AND player_num = $2';
+  pool.query(checkQuery, [player_name, player_num], (checkError, checkResults) => {
+    if (checkError) {
+      console.error('Error checking player:', checkError);
+      res.status(500).json({ message: 'Error checking player' });
       return;
     }
-    res.json({ message: 'Player registered successfully', player_id: results.insertId });
+
+    if (checkResults.rows.length > 0) {
+      // プレイヤーが既に存在する場合
+      res.status(409).json({ message: 'Player with the same name and number already exists' });
+    } else {
+      // プレイヤーが存在しない場合、挿入を実行
+      const insertQuery = 'INSERT INTO players (player_name, player_num) VALUES ($1, $2)';
+      pool.query(insertQuery, [player_name, player_num], (insertError, insertResults) => {
+        if (insertError) {
+          console.error('Error inserting player:', insertError);
+          res.status(500).json({ message: 'Error inserting player' });
+          return;
+        }
+        res.json({ message: 'Player registered successfully', player_id: insertResults.insertId });
+      });
+    }
   });
 });
 
-app.post('/api/shows', (req, res) => {
+
+
+
+app.post('/api/shows', async (req, res) => {
   const { show_name, show_date, show_location } = req.body;
 
   if (!show_name) {
     res.status(400).json({ message: 'ShowName is required' });
     return;
+  }
+
+  const checkQuery = 'SELECT * FROM shows WHERE show_name = $1';
+  const checkResult = await pool.query(checkQuery, [show_name]);
+
+  if (checkResult.rows.length > 0) {
+    return res.status(409).json({ error: 'Show already exists' });
   }
 
   const query = 'INSERT INTO shows (show_name, show_date, show_location) VALUES ($1, $2, $3)';
